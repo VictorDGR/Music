@@ -44,23 +44,18 @@
                 </button>
             </div>
         </section>
-        
-        <!-- Contenedor para mostrar los videos -->
         <div id="listaVideo" class=""></div>
-        
-        <!-- Contenedor donde se insertará el reproductor de video -->
         <div id="reproductor" class="reproductor"></div>
     </section>
 
     <script>
-        // Función para cargar los videos de la API de YouTube
         function fetchVideos(query) {
             let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${query}&key=AIzaSyD63tU9V6TIpD7nrTltioO3QwjP5xCXvpc`;
             fetch(url).then((serverData) => {
                 return serverData.json();
             }).then(data => {
                 let lista = document.querySelector('#listaVideo');
-                lista.innerHTML = ''; // Limpiar la lista antes de agregar nuevos videos
+                lista.innerHTML = ''; 
                 data.items.forEach(video => {
                     let li = document.createElement('li');
                     li.innerHTML = `
@@ -69,7 +64,6 @@
                         <h4>${video.snippet.title}</h4>
                     `;
 
-                    // Agregar el evento de clic a la imagen
                     li.querySelector('img').addEventListener('click', function() {
                         let videoId = this.getAttribute('data-video-id');
                         playVideo(videoId);
@@ -81,7 +75,6 @@
             });
         }
 
-        // Lógica de búsqueda cuando el usuario presiona el botón de búsqueda
         document.getElementById('buscador').addEventListener('click', function() {
             let searchQuery = document.getElementById('searchInput').value.trim();
             if (searchQuery) {
@@ -125,8 +118,6 @@
                     </div>
                 </div>
             `;
-
-            // Ahora que el botón 'guardar' está presente, puedes agregar el evento click aquí
             document.getElementById("guardar").addEventListener('click', () => {
                 let url = `https://www.youtube.com/watch?v=${videoId}`
                 localStorage.setItem("playlist", url)
@@ -137,17 +128,16 @@
                 const w = document.getElementById("pausa");
                 if (!q.paused) {
                     q.pause();
-                    w.textContent = 'Reproducir Video';  // Cambiar el texto del botón
+                    w.textContent = 'Reproducir Video';
                 } else {
                     q.play();
-                    w.textContent = 'Pausar Video';  // Cambiar el texto del botón
+                    w.textContent = 'Pausar Video';
     }
 
                 
             });
         }
 
-        // Inicializar con una búsqueda predeterminada (por ejemplo, música)
         fetchVideos("musica top");
     </script>
 </body>
