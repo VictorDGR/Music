@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    
+    <section class="uno">
+        <section class="dos">
+            <div class="repro">
+                <div class="buscador">
+                    <img src="./img/buscar.png" class="casa">
+                    <input type="text" id="searchInput" placeholder="Buscar..." class="lo">
+                    <button id="buscador" class="boton1"><img src="img/bus.png" class="bus"></button>
+                </div>
+                <div class="a">
+                    <div class="ab">
+                        <img src="./img/inicio.png" class="casa">
+                        <p class="g">Inicio</p>
+                    </div>
+                </div>
+                <div class="b">
+                    <div class="ab">
+                        <img src="./img/biblioteca.png" class="casa">
+                        <p class="g">Biblioteca</p>
+                    </div>
+                </div>
+                <div class="c">
+                    <div class="ab">
+                        <img src="./img/mas.png" class="casa">
+                        <p class="g">Crear</p>
+                    </div>
+                </div>
+            </div>
+            <div class="botones">
+                <button class="bot">
+                    Registrarse
+                </button>
+                <button class="bot">
+                    Iniciar sesión
+                </button>
+            </div>
+        </section>
+        
+        <!-- Contenedor para mostrar los videos -->
+        <div id="listaVideo" class=""></div>
+        
+        <!-- Contenedor donde se insertará el reproductor de video -->
+        <div id="reproductor" class="reproductor"></div>
+    </section>
+
+    <script>
+        // Función para cargar los videos de la API de YouTube
+        function fetchVideos(query) {
+            let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${query}&key=AIzaSyD63tU9V6TIpD7nrTltioO3QwjP5xCXvpc`;
+            fetch(url).then((serverData) => {
+                return serverData.json();
+            }).then(data => {
+                let lista = document.querySelector('#listaVideo');
+                lista.innerHTML = ''; // Limpiar la lista antes de agregar nuevos videos
+                data.items.forEach(video => {
+                    let li = document.createElement('li');
+                    li.innerHTML = `
+                        <img class="lazy-image" data-src="${video.snippet.thumbnails.medium.url}"  
+                             src="./img/descarga.png" data-video-id="${video.id.videoId}">
+                        <h4>${video.snippet.title}</h4>
+                    `;
+
+                    // Agregar el evento de clic a la imagen
+                    li.querySelector('img').addEventListener('click', function() {
+                        let videoId = this.getAttribute('data-video-id');
+                        playVideo(videoId);
+                    });
+
+                    lista.appendChild(li);
+                });
+                laziLoadImage('.lazy-image', { threshold: 0.1 });
+            });
+        }
+
+        // Lógica de búsqueda cuando el usuario presiona el botón de búsqueda
+        document.getElementById('buscador').addEventListener('click', function() {
+            let searchQuery = document.getElementById('searchInput').value.trim();
+            if (searchQuery) {
+                fetchVideos(searchQuery);
+            }
+        });
+
+        function laziLoadImage(selector, options = { threshold: 0.5 }) {
+            const images = document.querySelectorAll(`${selector}[data-src]`);
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        observer.unobserve(img);
+                    }
+                });
+            }, options);
+
+            images.forEach(image => {
+                observer.observe(image);
+            });
+        }
+
+        function playVideo(videoId) {
+            const reproductor = document.getElementById('reproductor');
+            reproductor.innerHTML = `
+                <div class="def">
+                    <div>
+                        <button class="bot1" id="pausa">
+                            <img src="./img/pausa.png" width="50" height="50" class="boton2" id="plays">
+                        </button>
+                        <button class="bot12" id="guardar">
+                            <img src="./img/mas.png" width="50" height="50" class="boton2">
+                        </button>
+                    </div>
+                    <div class="vi">
+                        <iframe width="400" height="300" id="spo"
+                            src="https://www.youtube.com/embed/${videoId}?autoplay=1"
+                        ></iframe>
+                    </div>
+                </div>
+            `;
+
+            // Ahora que el botón 'guardar' está presente, puedes agregar el evento click aquí
+            document.getElementById("guardar").addEventListener('click', () => {
+                let url = `https://www.youtube.com/watch?v=${videoId}`
+                localStorage.setItem("playlist", url)
+                console.log(localStorage.getItem("playlist"));
+            });
+            document.getElementById("pausa").addEventListener('click', () => {
+                const q = document.getElementById("spo");
+                const w = document.getElementById("pausa");
+                if (!q.paused) {
+                    q.pause();
+                    w.textContent = 'Reproducir Video';  // Cambiar el texto del botón
+                } else {
+                    q.play();
+                    w.textContent = 'Pausar Video';  // Cambiar el texto del botón
+    }
+
+                
+            });
+        }
+
+        // Inicializar con una búsqueda predeterminada (por ejemplo, música)
+        fetchVideos("musica top");
+    </script>
+</body>
+</html>
